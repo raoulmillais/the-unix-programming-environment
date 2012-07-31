@@ -1,7 +1,7 @@
 #! /bin/bash
 # regression suite for vis
 
-PROG_NAME='./vis'
+PROG_NAME='bin/vis'
 # warn: print a message on error on stderr and stdout
 function warn() {
 	echo "${1}" 2>&1
