@@ -1,0 +1,11 @@
+#! /bin/bash
+# which: program for finding the location of an executable for a command
+
+for i in $(echo $PATH | sed 's/^:/. /g; s/:$/g; ./g; s/::/; . /g; s/:/ /g;')
+do
+	# Is there a file named after the first parameter in this path component
+	[[ -x  $i/$1 ]] && (echo $i/$1; exit 0)
+done
+
+# No match found in path
+exit 1

@@ -1,0 +1,16 @@
+#! /bin/bash
+# checkmail: watch mailbox for new items
+
+PATH=/bin:/usr/bin
+
+interval=${1-60}
+lastlisting="`\ls -l ${MAIL} | tail -n +2`"
+
+while :
+do
+	# Note this technique will not work with Maildir format mailboxes as there
+	# are multiple folders.
+	currentlisting="`\ls -l ${MAIL}`"
+	echo $lastlisting $currentlisting
+	sleep $interval
+done | awk '$5 < $14 { print "You have new mail"; }';

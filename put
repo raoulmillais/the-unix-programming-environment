@@ -1,0 +1,32 @@
+#! /bin/bash
+# put: record file state in history
+
+PATH=.:/bin:/usr/bin
+
+case $# in
+	1) HIST=$1.H ;;
+	*) echo 'Usage: put file' 2>&1; exit 1 ;;
+esac
+
+if test ! -r $1
+then
+	echo "put: can't open $1" 1>&2
+	exit 1
+fi
+echo -n "Summary: "
+read summary
+
+trap 'rm -f /tmp/put.[ab]$$; exit 1' 1 2 15
+if get -o /tmp/put.a$$ $1 # read the previous version into a
+then
+	cp $1 /tmp/put.b$$ # copy the current version to b
+	echo "@@@ ${USER} `date` $summary" >>/tmp/put.b$$ # write the commit msg
+	diff -e $1 /tmp/put.a$$ >>/tmp/put.b$$ # write the latest ed commands
+	sed -n '/^@@@/,$p' <$HIST >>/tmp/put.b$$ # write the remaining history
+	cp /tmp/put.b$$ $HIST
+else
+	echo "put: creating ${HIST}"
+	cp $1 $HIST
+	echo "@@@ ${USER} `date` $summary" >>$HIST
+fi
+rm -f /tmp/put.[ab]$$
