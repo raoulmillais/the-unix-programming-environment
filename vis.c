@@ -16,24 +16,13 @@ isprintable(char c)
 	return 0;
 }
 
-int
-main(int argc, char *argv[])
+void
+processfile(FILE* in, int nchar)
 {
 	int c = EOF;
-	int nchar = 0, i = 0, max = 0;
+	int i = 0, max = 0;
 	char buf[MAXLEN] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
-	FILE *in = stdin, *out = stdout;
-
-	if (argc > 1 && strstr(argv[1], "-s") == argv[1]) {
-		if (argv[1][2] == '\0' || !isdigit(argv[1][2])) {
-			printf("%s\n", "Usage: vis [-s]N");
-			return 1;
-		}
-
-		nchar = atoi(argv[1] + 2);
-		if (nchar == 0)
-			printf("Usage: a positive integer must be supplied\n", nchar);
-	}
+	FILE *out = stdout;
 
 	while ((c = getc(in)) != EOF) {
 		max = i = 1;
@@ -53,7 +42,7 @@ main(int argc, char *argv[])
 		buf[i] = '\0';
 
 		/* if we got nchar printable characters and the buffer is not empty
-		 * print the buffer and keep printing until EOF or an unprintable 
+		 * print the buffer and keep printing until EOF or an unprintable
 		 * character */
 		if (i >= nchar && buf[0] != '\0') {
 			printf(buf);
@@ -68,6 +57,54 @@ main(int argc, char *argv[])
 			buf[i] = '\0';
 		}
 	}
+}
 
-	return 0;
+int
+main(int argc, char *argv[])
+{
+	int nchar = 0, i = 0;
+	char buf[MAXLEN] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
+	FILE *in = stdin, *out = stdout;
+
+	/* process -s switch and value as first argument if present */
+	if (argc > 1 && strstr(argv[1], "-s") == argv[1]) {
+		if (argv[1][2] == '\0' || !isdigit(argv[1][2])) {
+			fprintf(stderr, "%s\n", "Usage: vis [-sX] [file1 ...]");
+			return 1;
+		}
+
+		nchar = atoi(argv[1] + 2);
+		if (nchar == 0) {
+			fprintf(stderr, "Usage: a positive integer must be supplied\n");
+			return 1;
+		}
+	}
+
+	/* -sX only or other arguments - use stdin */
+	if ((argc == 2 & nchar > 0) || argc == 1) {
+		processfile(stdin, nchar);
+		return 0;
+	}
+
+	/* process all remaining arguments as filenames */
+	if (argc > 1) {
+		for (i = (nchar == 0) ? 1 : 2; i < argc; i++) {
+			if ((in = fopen(argv[i], "r")) == NULL) {
+				fprintf(stderr, "Unable to open file: %s\n", argv[i]);
+				continue;
+			}
+
+			processfile(in, nchar);
+
+			if (fclose(in) == EOF) {
+				fprintf(stderr, "Unable to close file: %s\n", argv[i]);
+				continue;
+			}
+		}
+
+		return 0;
+	}
+
+	/* shouldn't get here */
+	return 666;
 }
