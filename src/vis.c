@@ -17,10 +17,10 @@ isprintable(char c)
 }
 
 void
-processfile(FILE* in, int nchar)
+vis(FILE* in, int nchar)
 {
 	int c = EOF;
-	int i = 0, max = 0;
+	int i = -1, max = 0;
 	char buf[MAXLEN] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
 	FILE *out = stdout;
 
@@ -82,7 +82,7 @@ main(int argc, char *argv[])
 
 	/* -sX only or other arguments - use stdin */
 	if ((argc == 2 & nchar > 0) || argc == 1) {
-		processfile(stdin, nchar);
+		vis(stdin, nchar);
 		return 0;
 	}
 
@@ -94,7 +94,7 @@ main(int argc, char *argv[])
 				continue;
 			}
 
-			processfile(in, nchar);
+			vis(in, nchar);
 
 			if (fclose(in) == EOF) {
 				fprintf(stderr, "Unable to close file: %s\n", argv[i]);
